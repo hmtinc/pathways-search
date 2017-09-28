@@ -25,7 +25,7 @@
     "cytoscape-fisheye": "git+https://github.com/d2fong/cytoscape.js-fisheye.git",
     "cytoscape-klay": "^3.0.0",
     "cytoscape-sbgn-stylesheet": "^3.0.1",
-    "cytoscape-tippy" : "git+https://github.com/hmtinc/cytoscape.js-tippy.git",
+    "cytoscape-tippy": "git+https://github.com/hmtinc/cytoscape.js-tippy.git",
     "extend": "^3.0.1",
     "fast-memoize": "^2.2.7",
     "fetch-ponyfill": "^4.0.0",
