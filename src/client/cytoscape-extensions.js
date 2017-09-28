@@ -1,6 +1,6 @@
 import cytoscape from 'cytoscape';
 
-//layouts
+//Layouts
 import cola from 'cytoscape-cola';
 import klay from 'cytoscape-klay';
 import klayjs from 'klayjs';
@@ -10,6 +10,9 @@ import dagre from 'cytoscape-dagre';
 import compoundCollapse from 'cytoscape-compound-collapse';
 import fisheye from 'cytoscape-fisheye';
 
+//Tooltips 
+import tippy from 'cytoscape-tippy';
+
 
 export default () => {
   cytoscape.use(cola);
@@ -18,4 +21,5 @@ export default () => {
   cytoscape.use(dagre);
   cytoscape.use(compoundCollapse);
   cytoscape.use(fisheye);
+  cytoscape.use(tippy);
 };
