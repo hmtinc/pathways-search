@@ -26,3 +26,31 @@
     font-weight: 300;
     color: #1879F8;
 }
+
+.tooltip-button-pdf {
+    position: absolute;
+    top: 253px;
+    left: 94px;
+    text-align: center;
+    width: 15px;
+    /* height: 290px; */
+    /* word-wrap: break-word; */
+    overflow-y: auto;
+    font-size: 17pt;
+    font-weight: 300;
+    color: #1879F8;
+}
+
+.tooltip-button-show {
+    position: absolute;
+    top: 255px;
+    left: 120px;
+    text-align: center;
+    width: 20px;
+    /* height: 290px; */
+    /* word-wrap: break-word; */
+    overflow-y: auto+;
+    font-size: 17pt;
+    font-weight: 300;
+    color: #1879F8;
+}
