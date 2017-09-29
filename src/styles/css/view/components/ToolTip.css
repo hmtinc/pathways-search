@@ -1,0 +1,15 @@
+.tooltip-image {
+    position: relative;
+    width: 100%; 
+ }
+
+ .tooltip-internal {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 243px;
+    height: 290px;
+    word-wrap: break-word;
+    overflow-y: auto;
+    font-size: 8pt;
+ }

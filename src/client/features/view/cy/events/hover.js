@@ -11,7 +11,7 @@ const storeStyle = (ele, keys) => {
 };
 
 const dynamicScalingfactors = (zoom) => {
-  const scalingFactor = ( 1 / zoom );
+  const scalingFactor = (1 / zoom);
   const defaults = {
     fontSize: 40,
     outlineWidth: 4,
@@ -38,7 +38,7 @@ const applyHoverStyle = (cy, eles, style) => {
   eles.forEach((ele) => {
     ele.scratch('_hover-style-before', storeStyle(ele, stylePropNames));
   });
-  
+
   cy.batch(function () {
     eles.style(style);
   });
@@ -58,7 +58,7 @@ const scaledDimensions = (node, zoom) => {
   const nw = node.width();
   const nh = node.height();
 
-  if (nw === 0 || nh === 0) { return { w: 0, h: 0};}
+  if (nw === 0 || nh === 0) { return { w: 0, h: 0 }; }
 
   const scaledVal = (1 / zoom) * 8;
   const aspectRatio = nw / nh;
@@ -80,7 +80,7 @@ const scaledDimensions = (node, zoom) => {
 };
 
 
-const baseNodeHoverStyle =  {
+const baseNodeHoverStyle = {
   'background-color': 'blue',
   'opacity': 1,
   'z-compound-depth': 'top',
@@ -167,6 +167,28 @@ const bindHover = (cy) => {
     removeHoverStyle(cy, edge.source());
     removeHoverStyle(cy, edge.target());
   });
+
+
+  //Tippy JS Events
+  //Binding actions (Try/Catch blocks re only for quick demo purposes)
+  //Bind mouse over event to tippy.show()
+  cy.on('mouseover', 'node', function (evt) {
+    try {
+      var popperElement = evt.target.scratch('tippy-popper');
+      evt.target.scratch('tippy').show(popperElement);
+    }
+    catch (e) { console.log(e);}
+  });
+
+  //Bind mouse out  event to tippy.hide()
+  cy.on('mouseout', 'node', function (evt) {
+    try {
+      var popperElement = evt.target.scratch('tippy-popper');
+      evt.target.scratch('tippy').hide(popperElement);
+    }
+    catch (e) {console.log(e);}
+  });
+
 };
 
 export default bindHover;
