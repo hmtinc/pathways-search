@@ -177,7 +177,7 @@ const bindHover = (cy) => {
       var popperElement = evt.target.scratch('tippy-popper');
       evt.target.scratch('tippy').show(popperElement);
     }
-    catch (e) { console.log(e);}
+    catch (e) {}
   });
 
   //Bind mouse out  event to tippy.hide()
@@ -186,7 +186,7 @@ const bindHover = (cy) => {
       var popperElement = evt.target.scratch('tippy-popper');
       evt.target.scratch('tippy').hide(popperElement);
     }
-    catch (e) {console.log(e);}
+    catch (e) {}
   });
 
 };
