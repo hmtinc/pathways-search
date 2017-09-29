@@ -1,4 +1,4 @@
-  //Get html template for the tooltip
+    //Get html template for the tooltip
   export function loadHtmlTemplate(cy, callback) {
     var xhr= new XMLHttpRequest();
     xhr.open('GET', './toolTipTemplate.html', true);
@@ -13,10 +13,10 @@
   //Create a tippy object for each node
   export function bindTippyToElements(cy, htmlTemplate){
     cy.elements().each(function (element, i) {
-      //Create a DOM reference object for tippy 
+      //Create a DOM reference object for tippy
       var tippyReference = document.createElement('div');
       tippyReference.id = 'tippy-obj' + element.id();
-      //
+
       //Set tooltip contents
       var innerHTMLSelector = 'something' + tippyReference.id;
       tippyReference.innerHTML = '<div id=\"' + innerHTMLSelector + '\">' + htmlTemplate + '</div>';
