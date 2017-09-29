@@ -8,8 +8,11 @@ export class ToolTip extends React.Component {
     //Keep record of elements to render
     var renderedArray = [];
     var count = 0;
+    var i = 0;
 
-    this.props.cy.elements().each(function (element, i) {
+    for(i = 0; i < this.props.cy.elements().length; i++) {
+      var element = this.props.cy.elements()[i];
+    //this.props.cy.elements().forEach(function (element, i) {
 
       //Get node name
       var name = getNodeDataField(element, 'label');
@@ -37,7 +40,7 @@ export class ToolTip extends React.Component {
                 a libero</div>
           </div></div></div>);
       }
-    });
+    }
 
     //Render all the tooltips
     return <div>{renderedArray}</div>;
@@ -54,11 +57,14 @@ export function bindTippyToElements(cy) {
 
   //Create Popper Elements for Tippy
   ReactDOM.render(<ToolTip cy={cy} />, document.getElementById('tooltips'));
- 
+
   //create a tippy element for each cytoscape element
-  cy.elements().each(function (element, i) {
+  var i = 0; 
+  for (i = 0; i < cy.elements().length; i++){
+  //cy.elements().forEach(function (element, i) {
 
     //Get node name
+    var element = cy.elements()[i];
     var name = getNodeDataField(element, 'label');
 
     //Only Create a tippy object if there is a name
@@ -76,7 +82,7 @@ export function bindTippyToElements(cy) {
         duration: 500
       });
     }
-  });
+  }
 }
 
 //Get a data field from a node
