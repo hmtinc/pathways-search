@@ -1,37 +1,74 @@
-//Get html template for the tooltip
-export function loadHtmlTemplate(cy, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', './toolTipTemplate.html', true);
-  xhr.onreadystatechange = function () {
-    if (this.readyState !== 4) return;
-    if (this.status !== 200) return; // or whatever error handling you want
-    callback(cy, this.responseText);
-  };
-  xhr.send();
+const React = require('react');
+const ReactDOM = require('react-dom');
+
+  //PopperJs Tooltips
+export class ToolTip extends React.Component {
+  render() {
+
+    //Keep record of elements to render
+    var renderedArray = [];
+    var count = 0;
+
+    this.props.cy.elements().each(function (element, i) {
+
+      //Get node name
+      var name = getNodeDataField(element, 'label');
+      var maxHeadingLength = 16;
+      count++;
+
+      if (name) {
+        //Trim Name
+        name = name.substring(0, maxHeadingLength);
+
+        //Create a DOM reference object for tippy
+        var id = 'tippy-obj' + element.id();
+        var innerHTMLSelector = 'inner-' + id;
+
+        //Create the tooltip
+        renderedArray.push(<div key={count} id={id}><div id={innerHTMLSelector}>
+          <div className="tooltip-image">
+            <img src="img/tooltip/tooltip.png" alt="" />
+            <div className="tooltip-heading"> {name} </div>
+            <img className="tooltip-button-pdf" src="img/tooltip/pdf.png" alt="" />
+            <img className="tooltip-button-show" src="img/tooltip/open.png" alt="" />
+            <div className="tooltip-internal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sagittis, sem non pharetra dictum, eros turpis condimentum
+                sem, ut sagittis mi elit a elit. Duis dignissim, augue a hendrerit venenatis, dolor metus sagittis nisi, vitae tempus
+                lectus risus vel lacus. Proin dictum, metus in accumsan condimentum, tortor diam porta tellus, et accumsan elit ex
+                a libero</div>
+          </div></div></div>);
+      }
+    });
+
+    //Render all the tooltips
+    return <div>{renderedArray}</div>;
+  }
 }
 
 //Create a tippy object for each node
-export function bindTippyToElements(cy, htmlTemplate) {
+export function bindTippyToElements(cy) {
+
+  //Create a placeholder for tooltips
+  var tippyReference = document.createElement('div');
+  tippyReference.id = 'tooltips';
+  document.body.appendChild(tippyReference);
+
+  //Create Popper Elements for Tippy
+  ReactDOM.render(<ToolTip cy={cy} />, document.getElementById('tooltips'));
+ 
+  //create a tippy element for each cytoscape element
   cy.elements().each(function (element, i) {
 
     //Get node name
     var name = getNodeDataField(element, 'label');
 
+    //Only Create a tippy object if there is a name
     if (name) {
-      //Create a DOM reference object for tippy
-      var tippyReference = document.createElement('div');
-      tippyReference.id = 'tippy-obj' + element.id();
-
-      //Insert node details 
-      var modifiedTemplate = formatHTML(htmlTemplate, {name : name});
-
-      //Set tooltip contents
-      var innerHTMLSelector = 'something' + tippyReference.id;
-      tippyReference.innerHTML = '<div id=\"' + innerHTMLSelector + '\">' + modifiedTemplate + '</div>';
-      document.body.appendChild(tippyReference);
+      //var tippyReference = document.createElement('div');
+      var id = 'tippy-obj' + element.id();
+      var innerHTMLSelector = 'inner-' + id;
 
       //Create tippy object 
-      var tip = element.tippy('#' + tippyReference.id, {
+      var tip = element.tippy('#' + id, {
         html: document.querySelector('#' + innerHTMLSelector),
         arrow: false,
         animation: 'fade',
@@ -40,18 +77,6 @@ export function bindTippyToElements(cy, htmlTemplate) {
       });
     }
   });
-}
-
-//Replace placeholders with actual values
-function formatHTML(htmlTemplate, values){
-
-  var maxHeadingLength = 16;
-
-  //Insert the node name
-  values.name = values.name.substring(0, maxHeadingLength);
-  htmlTemplate = htmlTemplate.replace('GeneNameGoesHere', values.name);
-
-  return htmlTemplate;
 }
 
 //Get a data field from a node

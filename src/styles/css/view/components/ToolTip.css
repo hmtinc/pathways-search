@@ -24,7 +24,7 @@
     overflow-y: auto;
     font-size: 17pt;
     font-weight: 300;
-    color: #1879F8;
+    color: var(--peterRiver);
 }
 
 .tooltip-button-pdf {
@@ -38,7 +38,6 @@
     overflow-y: auto;
     font-size: 17pt;
     font-weight: 300;
-    color: #1879F8;
 }
 
 .tooltip-button-show {
@@ -52,5 +51,4 @@
     overflow-y: auto+;
     font-size: 17pt;
     font-weight: 300;
-    color: #1879F8;
 }

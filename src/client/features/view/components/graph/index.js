@@ -63,8 +63,8 @@ export class Graph extends React.Component {
 
     cy.remove('*');
     cy.add(graphJSON);
-    
-    toolTipCreator.loadHtmlTemplate(cy, toolTipCreator.bindTippyToElements);
+
+    toolTipCreator.bindTippyToElements(cy);
 
     const layout = getDefaultLayout(cy.nodes().size());
 
