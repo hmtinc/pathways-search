@@ -23,11 +23,11 @@ export function bindTippyToElements(cy, htmlTemplate) {
       tippyReference.id = 'tippy-obj' + element.id();
 
       //Insert node details 
-      htmlTemplate = formatHTML(htmlTemplate, {name : name});
+      var modifiedTemplate = formatHTML(htmlTemplate, {name : name});
 
       //Set tooltip contents
       var innerHTMLSelector = 'something' + tippyReference.id;
-      tippyReference.innerHTML = '<div id=\"' + innerHTMLSelector + '\">' + htmlTemplate + '</div>';
+      tippyReference.innerHTML = '<div id=\"' + innerHTMLSelector + '\">' + modifiedTemplate + '</div>';
       document.body.appendChild(tippyReference);
 
       //Create tippy object 
@@ -45,8 +45,11 @@ export function bindTippyToElements(cy, htmlTemplate) {
 //Replace placeholders with actual values
 function formatHTML(htmlTemplate, values){
 
-  //Insert the node name
+  var maxHeadingLength = 16;
 
+  //Insert the node name
+  values.name = values.name.substring(0, maxHeadingLength);
+  htmlTemplate = htmlTemplate.replace('GeneNameGoesHere', values.name);
 
   return htmlTemplate;
 }
