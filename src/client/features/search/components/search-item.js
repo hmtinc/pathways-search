@@ -35,6 +35,7 @@ export class SearchItem extends React.Component {
     const state = this.state;
     const data = props.data;
     const searchUri = queryString.stringify({uri: data.uri});
+    console.log(data);
 
     return (
       <div className="SearchItem clearfix">
