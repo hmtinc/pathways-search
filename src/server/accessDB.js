@@ -41,11 +41,15 @@ function createNew(connection, uri, data, version, callback){
     var uriTP = insert('uriTranslation',{uri_id:ids[0].generated_keys[0],graph_id: ids[1].generated_keys[0]}, connection);
     var uriVP = insert('versionTranslation',{graph_id:ids[1].generated_keys[0],version_id: ids[2].generated_keys[0]}, connection);
     return Promise.all([uriTP,uriVP]);
+  }).catch((e)=>{
+    console.log(e);
   });
 
   if(callback){
     createPromise.then(result=>{
       callback();
+    }).catch((e)=>{
+      console.log(e);
     });
   } else {
     return createPromise;
@@ -75,6 +79,8 @@ function getGraphID(uri,version,connection,callback){
 
   var graphProm = Promise.all([versionMatches,uriMatches]).then(([verCursor, uriCursor])=>{
     return Promise.all([verCursor.toArray(),uriCursor.toArray()]);
+  }).catch((e)=>{
+    console.log(e);
   }).then(([versions,uris])=>{
     if (versions.length === 0){
       // this shouldn't happen. Version update script should handle this connection
@@ -94,11 +100,15 @@ function getGraphID(uri,version,connection,callback){
     }
     throw new Error('No match between graphs for this set of version number and uri');
     // If there is no match then this uri hasn't been saved in this version? Shouldn't happen
-  })
+  }).catch(function(e){
+      console.log(e);
+  });
 
   if(callback){
     graphProm.then((result)=>{
       callback();
+    }).catch(function(e){
+      console.log(e);
     });
   }else{
     return graphProm;
@@ -114,10 +124,15 @@ function updateEntry(uri, layout, version, user, connection, callback){
       graph_id:result, layout:layout, date_added: new Date(),
       flagged:false, added_by: user},
       connection);
-  })
+  }).catch(function(e){
+    console.log(e);
+  });
 
   if(callback){ 
-    result.then(callback());
+    result.then(callback())
+    .catch(function(e){
+      console.log(e);
+    });
   } else {
     return result;
   }
@@ -129,7 +144,9 @@ function runFakeHeuristics(layouts,callback){
   var layout = layouts.toArray()
   .then((result)=>{
     return result[0];
-  })
+  }).catch(function(e){
+    console.log(e);
+  });
 
   if(callback){
     callback();
@@ -149,23 +166,40 @@ function getLayout(uri, version,connection, callback){
     .filter({graph_id:result})
     .orderBy(r.desc('date_added'))
     .run(connection);
+  }).catch((e)=>{
+    console.log(e);
   })
   .then((result)=>{
     //console.log(result);
     return runFakeHeuristics(result);
-  })
+  }).catch((e)=>{
+    console.log(e);
+  });
 
   
   if(callback){
     layout.then((result)=>{
       callback();
+    }).catch((e)=>{
+      console.log(e);
     });
   } else {
     return layout;
   }
 }
 
+function connect(){
+  var connection = null;
+  r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
+      if (err) throw err;
+      connection = conn;
+  })
+ 
+  return connection;
+}
+
 module.exports = {
+  connect: connect,
   getLayout: getLayout,
   updateEntry: updateEntry,
   createNew: createNew
