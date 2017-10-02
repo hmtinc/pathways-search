@@ -44,6 +44,7 @@
     "react-dom": "^15.6.1",
     "react-ga": "^2.2.0",
     "react-router-dom": "^4.0.0",
+    "rethinkdb": "^2.3.3",
     "sbgnml-to-cytoscape": "^3.0.2",
     "spinkit": "^1.2.5"
   },
