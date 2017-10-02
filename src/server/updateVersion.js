@@ -151,3 +151,6 @@ function updateVersionEntry(uri,data,versionId,connection,callback){
     }
 }
 
+module.exports = {
+  updateVersion: updateVersion
+}

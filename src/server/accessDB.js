@@ -132,9 +132,7 @@ function runFakeHeuristics(layouts,callback){
   })
 
   if(callback){
-    layout.then((result)=>{
-      callback();
-    });
+    callback();
   }else{
     return layout;
   }
@@ -145,6 +143,7 @@ function runFakeHeuristics(layouts,callback){
 function getLayout(uri, version,connection, callback){
   var layout = getGraphID(uri,version,connection)
   .then((result)=>{
+    //console.log(result);
     return r.db(dbName)
     .table('layout')
     .filter({graph_id:result})
@@ -152,8 +151,10 @@ function getLayout(uri, version,connection, callback){
     .run(connection);
   })
   .then((result)=>{
+    //console.log(result);
     return runFakeHeuristics(result);
   })
+
   
   if(callback){
     layout.then((result)=>{
@@ -164,25 +165,9 @@ function getLayout(uri, version,connection, callback){
   }
 }
 
+module.exports = {
+  getLayout: getLayout,
+  updateEntry: updateEntry,
+  createNew: createNew
+}
 
-
-// ----------- TEST CODE --------------------
-var connection = null;
-
-r.connect({host:'localhost', port:28015})
-.then(function(conn){
-  connection = conn;
-  var a = createNew(conn,'test','gobbledegook','6.6.6');
-  var b =createNew(conn, 'test', 'hooplah', '1.1.1');
-  var c = createNew(conn, 'test2', 'hello', '1.1.1');
-
-  return Promise.all([a,b,c]);
-})
-.then(function(result){
-  updateEntry('test','bad-layout','1.1.1','billybob',connection)
-  .then(function(result){
-    return getLayout('test','1.1.1',connection);
-  }).then(function(result){
-    console.log(result);
-  });
-})
