@@ -8,12 +8,72 @@ var accessDB = require('./accessDB.js');
 //Connection 
 var connection = null;
 
+//Return Confirmation 
+app.get('/', function (req, res) {
+    res.json("This Server Uses Socket.io!")
+});
 
 //Return if a user can edit
 app.get('/CanEdit', function (req, res) {
     res.json(auth.checkUser(req));
 });
 
+
+// Get a layout and respond using socket.io
+function getLayout(io, socket, ioPackage){
+    //Get the requested layout
+    try {
+        accessDB.getLayout(
+            ioPackage.uri,
+            ioPackage.version,
+            connection,
+            function (layout) {
+                io.emit('LayoutPackage', layout);
+            });
+    }
+    catch (e) {
+        io.emit('error', 'error');
+    }
+}
+
+// Submit a layout and respond using socket.io
+function submitLayout(io, socket, ioPackage){
+    //Get the requested layout
+    try {
+        if (auth.checkUser(socket.request.connection.remoteAddress, true)) {
+            accessDB.updateEntry(req.body.uri,
+                req.body.layout,
+                req.body.version,
+                socket.request.connection.remoteAddress,
+                function () { io.emit('Updated');});
+        }
+        else {
+            io.emit('error', 'ERROR');
+        }
+    }
+    catch (e) {
+        io.emit('error', 'ERROR');
+    }
+}
+
+
+io.on('connection', function (socket) {
+    
+    //Get Layout 
+    socket.on('getlayout', function(ioPackage){
+        getLayout(io, socket,ioPackage);
+    });
+
+     //Submit Layout
+     socket.on('submitlayout', function(ioPackage){
+        submitLayout(io, socket, ioPackage);
+    });
+
+
+});
+
+
+// ------------------ Standard API Functions (Sans Socket IO) ---------------- 
 //Get Layout
 app.get('/GetLayout', function (req, res) {
     //Get the requested layout
@@ -31,6 +91,8 @@ app.get('/GetLayout', function (req, res) {
     }
 });
 
+
+
 //Return if a user can edit
 app.post('/SubmitLayout', function (req, res) {
 
@@ -40,7 +102,7 @@ app.post('/SubmitLayout', function (req, res) {
             accessDB.updateEntry(req.body.uri,
                 req.body.layout,
                 req.body.version,
-                auth.getIP(req),
+                req.ip, 
                 function () { res.json('Success: Update Applied!'); });
         }
         else {
@@ -52,10 +114,6 @@ app.post('/SubmitLayout', function (req, res) {
     }
 });
 
-
-io.on('connection', function (socket) {
-    console.log('A user connected');
-});
 
 http.listen(2001, function () {
     console.log('listening on *:2001');
