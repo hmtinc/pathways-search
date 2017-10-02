@@ -4,9 +4,24 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var auth = require('./auth.js');
 var accessDB = require('./accessDB.js');
+var bodyParser = require('body-parser');
 
-//Connection 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+
+//Connection
 var connection = null;
+const r = require('rethinkdb');
+r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
+    if (err) throw err;
+    connection = conn;
+})
+
+
+
 
 //Return Confirmation 
 app.get('/', function (req, res) {
@@ -95,14 +110,14 @@ app.get('/GetLayout', function (req, res) {
 
 //Return if a user can edit
 app.post('/SubmitLayout', function (req, res) {
-
     //Get the requested layout
     try {
         if (auth.checkUser(req)) {
             accessDB.updateEntry(req.body.uri,
                 req.body.layout,
                 req.body.version,
-                req.ip, 
+                req.ip,
+                connection,
                 function () { res.json('Success: Update Applied!'); });
         }
         else {
@@ -110,6 +125,7 @@ app.post('/SubmitLayout', function (req, res) {
         }
     }
     catch (e) {
+        console.log(e);
         res.json('ERROR : Layout Update Failed!');
     }
 });
