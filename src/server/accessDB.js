@@ -189,13 +189,7 @@ function getLayout(uri, version,connection, callback){
 }
 
 function connect(){
-  var connection = null;
-  r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
-      if (err) throw err;
-      connection = conn;
-  })
- 
-  return connection;
+  return r.connect( {host: 'localhost', port: 28015});
 }
 
 module.exports = {

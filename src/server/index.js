@@ -12,18 +12,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-//Connection
-var connection = null;
-const r = require('rethinkdb');
-r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
-    if (err) throw err;
-    connection = conn;
-})
+var connPromise = accessDB.connect(); // returns a promise.
 
 
 
 
-//Return Confirmation 
+//Return Confirmation
 app.get('/', function (req, res) {
     res.json("This Server Uses Socket.io!")
 });
@@ -38,13 +32,15 @@ app.get('/CanEdit', function (req, res) {
 function getLayout(io, socket, ioPackage){
     //Get the requested layout
     try {
-        accessDB.getLayout(
-            ioPackage.uri,
-            ioPackage.version,
-            connection,
-            function (layout) {
-                io.emit('LayoutPackage', layout);
-            });
+        connPromise.then((connection)=>{
+            accessDB.getLayout(
+                ioPackage.uri,
+                ioPackage.version,
+                connection,
+                function (layout) {
+                    io.emit('LayoutPackage', layout);
+                });
+        })
     }
     catch (e) {
         io.emit('error', 'error');
@@ -55,16 +51,20 @@ function getLayout(io, socket, ioPackage){
 function submitLayout(io, socket, ioPackage){
     //Get the requested layout
     try {
-        if (auth.checkUser(socket.request.connection.remoteAddress, true)) {
-            accessDB.updateEntry(req.body.uri,
-                req.body.layout,
-                req.body.version,
-                socket.request.connection.remoteAddress,
-                function () { io.emit('Updated');});
-        }
-        else {
-            io.emit('error', 'ERROR');
-        }
+        connPromise.then((connection)=>{
+            if (auth.checkUser(socket.request.connection.remoteAddress, true)) {
+                accessDB.updateEntry(req.body.uri,
+                    req.body.layout,
+                    req.body.version,
+                    connection,
+                    function () { io.emit('Updated');});
+            }
+            else {
+                io.emit('error', 'ERROR');
+            }
+        }).catch((e)=>{
+            console.log(e);
+        });
     }
     catch (e) {
         io.emit('error', 'ERROR');
@@ -73,8 +73,8 @@ function submitLayout(io, socket, ioPackage){
 
 
 io.on('connection', function (socket) {
-    
-    //Get Layout 
+
+    //Get Layout
     socket.on('getlayout', function(ioPackage){
         getLayout(io, socket,ioPackage);
     });
@@ -88,18 +88,22 @@ io.on('connection', function (socket) {
 });
 
 
-// ------------------ Standard API Functions (Sans Socket IO) ---------------- 
+// ------------------ Standard API Functions (Sans Socket IO) ----------------
 //Get Layout
 app.get('/GetLayout', function (req, res) {
     //Get the requested layout
     try {
-        accessDB.getLayout(
-            req.uri,
-            req.version,
-            connection,
-            function (layout) {
-                res.json(layout);
-            });
+        connPromise.then((connnection)=>{
+            accessDB.getLayout(
+                req.uri,
+                req.version,
+                connection,
+                function (layout) {
+                    res.json(layout);
+                });
+        }).catch((e)=>{
+            console.log(e);
+        });
     }
     catch (e) {
         res.json('ERROR : Layout Request Failed!');
@@ -112,17 +116,21 @@ app.get('/GetLayout', function (req, res) {
 app.post('/SubmitLayout', function (req, res) {
     //Get the requested layout
     try {
-        if (auth.checkUser(req)) {
-            accessDB.updateEntry(req.body.uri,
-                req.body.layout,
-                req.body.version,
-                req.ip,
-                connection,
-                function () { res.json('Success: Update Applied!'); });
-        }
-        else {
-            res.json('ERROR : You Do Not Have Valid Permissions!');
-        }
+        connPromise.then((connection)=>{
+            if (auth.checkUser(req)) {
+                accessDB.updateEntry(req.body.uri,
+                    req.body.layout,
+                    req.body.version,
+                    req.ip,
+                    connection,
+                    function () { res.json('Success: Update Applied!'); });
+            }
+            else {
+                res.json('ERROR : You Do Not Have Valid Permissions!');
+            }
+        }).catch((e)=>{
+            console.log(e);
+        })
     }
     catch (e) {
         console.log(e);
@@ -133,4 +141,4 @@ app.post('/SubmitLayout', function (req, res) {
 
 http.listen(2001, function () {
     console.log('listening on *:2001');
-}); 
+});
