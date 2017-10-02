@@ -3,6 +3,8 @@ import {Col, Glyphicon, Navbar, Nav, NavItem, OverlayTrigger, Popover} from 'rea
 import {saveAs} from 'file-saver';
 import queryString from 'query-string';
 
+import Snackbar from 'material-ui/Snackbar';
+
 import {Graph, ModalFramework} from './components/';
 
 import make_cytoscape from './cy/';
@@ -26,7 +28,10 @@ export class View extends React.Component {
       cy: make_cytoscape({ headless: true }), // cytoscape mounted after Graph component has mounted
       sbgnText: {},
       name: '',
-      datasource: ''
+      datasource: '',
+      snackbarOpen: false,
+      snackbarMsg: '',
+      snackbarDur: 4000
     };
 
     PathwayCommonsService.query(query.uri, 'SBGN')
@@ -56,6 +61,8 @@ export class View extends React.Component {
       action: 'view',
       label: query.uri
     });
+
+    this.handleRequestClose = this.handleRequestClose.bind(this);
   }
 
   componentWillReceiveProps( nextProps ) {
@@ -67,6 +74,30 @@ export class View extends React.Component {
         label: this.state.query.uri
       });
     }
+  }
+  
+  componentWillMount() {
+    const editkey = this.state.query.editkey;
+    if (editkey != null) {
+      // CHECK FOR VALID EDIT KEY HERE
+      if (editkey === '12345678') {
+        this.setState({
+          snackbarOpen: true,
+          snackbarMsg: 'You are in edit mode. Be careful! Your changes are live.'
+        });
+      } else {
+        this.setState({
+          snackbarOpen: true,
+          snackbarMsg: 'Nice try, imposter.'
+        });
+      }
+    }
+  }
+
+  handleRequestClose() {
+    this.setState({
+      snackbarOpen: false,
+    });
   }
 
   render() {
@@ -148,6 +179,12 @@ export class View extends React.Component {
             </Navbar>)
           }
           <Graph cy={this.state.cy} sbgnText={this.state.sbgnText}/>
+          <Snackbar
+            open={this.state.snackbarOpen}
+            message={this.state.snackbarMsg}
+            autoHideDuration={this.state.snackbarDur}
+            onRequestClose={this.handleRequestClose}
+          />
           {/* Menu Modal */}
           <ModalFramework cy={this.state.cy} query={this.state.query} onHide={() => this.setState({active: ''})} active={this.state.active} name={this.state.name}/>
         </div>

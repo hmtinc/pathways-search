@@ -3,8 +3,9 @@ import {HashRouter, Route, Switch} from 'react-router-dom';
 import classNames from 'classnames';
 import {Alert} from 'react-bootstrap';
 import ReactGA from 'react-ga';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import {EntryPage, Search, View, Paint} from './features';
+import {EntryPage, Search, View, Paint, Admin} from './features';
 
 import {PathwayCommonsService} from './services/';
 
@@ -60,26 +61,29 @@ export class App extends React.Component {
 
   render() {
     return (
-      <HashRouter className='App'>
-        <div className={classNames('Index', this.state.embed ? 'iframe' : '', this.props.className)}>
-          <div className={this.state.embed ? '' : 'Content'}>
-            {
-              this.state.pcOnline ? null : (
-                <Alert bsStyle="warning">
-                  <strong>Unable to connect within { this.checkDelay / 1000 } seconds</strong> - continuing to try
-                </Alert>
-              )
-            }
-            <Switch>
-              <Route exact path="/" render={props => <EntryPage {...props} logEvent={ this.logEvent} logPageView={ this.logPageView} />}/>
-              <Route exact path="/search" render={props => <Search {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
-              <Route path="/view" render={props => <View {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
-              <Route path="/paint" render={props => <Paint {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
-              <Route path="*" render={props => <PageNotFound {...props}/>}/>
-            </Switch>
+      <MuiThemeProvider>
+        <HashRouter className='App'>
+          <div className={classNames('Index', this.state.embed ? 'iframe' : '', this.props.className)}>
+            <div className={this.state.embed ? '' : 'Content'}>
+              {
+                this.state.pcOnline ? null : (
+                  <Alert bsStyle="warning">
+                    <strong>Unable to connect within { this.checkDelay / 1000 } seconds</strong> - continuing to try
+                  </Alert>
+                )
+              }
+              <Switch>
+                <Route exact path="/" render={props => <EntryPage {...props} logEvent={ this.logEvent} logPageView={ this.logPageView} />}/>
+                <Route exact path="/search" render={props => <Search {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
+                <Route path="/view" render={props => <View {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
+                <Route path="/paint" render={props => <Paint {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
+                <Route path="/admin" render={props => <Admin {...props} logEvent={ this.logEvent } logPageView={ this.logPageView } />}/>
+                <Route path="*" render={props => <PageNotFound {...props}/>}/>
+              </Switch>
+            </div>
           </div>
-        </div>
-      </HashRouter>
+        </HashRouter>
+      </MuiThemeProvider>
     );
   }
 }

@@ -34,7 +34,6 @@ const tokenPrefix = (phrase, collection) => {
 export default (query, failureCount = 0) => { // Pass in all query parameters
   // queries must be non empty strings
   let queryVal = query.q;
-
   if (queryVal || typeof queryVal !== 'string') {
     return Promise.resolve(query.q);
   }

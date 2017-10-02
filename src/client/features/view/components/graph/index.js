@@ -2,12 +2,14 @@ import React from 'react';
 import classNames from 'classnames';
 import isEmpty from 'lodash.isempty';
 
-import {Col, Row, DropdownButton, MenuItem} from 'react-bootstrap';
+import { Col, Row, DropdownButton, MenuItem } from 'react-bootstrap';
 
 import convertSbgn from 'sbgnml-to-cytoscape';
 
-import {defaultLayout, getDefaultLayout, layoutNames, layoutMap} from './layout/';
-import {Spinner, ErrorMessage} from '../../../common-components';
+import { defaultLayout, getDefaultLayout, layoutNames, layoutMap } from './layout/';
+import { Spinner, ErrorMessage } from '../../../common-components';
+
+import * as toolTipCreator from './createToolTips.js' 
 
 // Graph
 // Prop Dependencies ::
@@ -53,6 +55,7 @@ export class Graph extends React.Component {
     }
   }
 
+
   // Graph rendering is not tracked by React
   renderGraph(sbgnString) {
     const graphJSON = convertSbgn(sbgnString);
@@ -60,6 +63,8 @@ export class Graph extends React.Component {
 
     cy.remove('*');
     cy.add(graphJSON);
+
+    toolTipCreator.bindTippyToElements(cy);
 
     const layout = getDefaultLayout(cy.nodes().size());
 
@@ -73,16 +78,13 @@ export class Graph extends React.Component {
 
   performLayout(layoutName) {
     const cy = this.props.cy;
-    cy.nodes().forEach(ele => {
-      ele.removeScratch('_fisheye-pos-before');
-    });
     cy.nodes('[class="complex"], [class="complex multimer"]').filter(node => node.isExpanded()).collapse();
     cy.layout(layoutMap.get(layoutName)).run();
   }
 
   render() {
     const layoutDropdownItems = this.state.availableLayouts.map((layoutName) =>
-      <MenuItem key={layoutName} onClick={() => this.setState({layout: layoutName})}>
+      <MenuItem key={layoutName} onClick={() => this.setState({ layout: layoutName })}>
         {layoutName}
       </MenuItem>
     );
@@ -98,12 +100,12 @@ export class Graph extends React.Component {
             </Col>
           </Row>
           <div className="SpinnerContainer">
-            <Spinner hidden={this.state.graphRendered}/>
+            <Spinner hidden={this.state.graphRendered} />
           </div>
           <div id={this.state.graphId} style={{
             width: this.state.width,
             height: this.state.height
-          }}/>
+          }} />
         </div>
       );
     }
