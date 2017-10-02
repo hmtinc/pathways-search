@@ -7,9 +7,9 @@ const bindMove = (cy) => {
 
   //
   cy.on('free', 'node', function(evt) {
-    console.log('Stopped dragging the node:\n'+evt.target.id()+'\nAt position:\n'+JSON.stringify(evt.target.position()));
+    //console.log('Stopped dragging the node:\n'+evt.target.id()+'\nAt position:\n'+JSON.stringify(evt.target.position()));
   });
-  
+
 };
 
 export default bindMove;
