@@ -11,10 +11,11 @@ Functions to write:
   - createUser(username, passwords, permissions) 
 */
 
+const dbName = 'layouts';
 const r = require('rethinkdb');
 
 function latestVersion(connection){
-  r.db('layouts')
+  r.db(dbName)
   .table('version')
   .orderBy(r.desc('key'))
   .run(connection, function(err,result){
@@ -23,43 +24,165 @@ function latestVersion(connection){
   });
 }
 
-function createNew(connection, uri, data, version, callback){
- 
-  var uriProm = r.db('layouts')
-  .table('uri')
-  .insert({uri: uri})
-  .run(connection);
-
-  var graphProm = r.db('layouts')
-  .table('graph')
-  .insert({graph:data})
-  .run(connection);
-
-  var verProm = r.db('layouts')
-  .table('version')
-  .insert({version:version})
-  .run(connection);
-
-  Promise.all([uriProm, graphProm, verProm]).then(ids=> {
-    r.db('layouts')
-    .table('uriTranslation')
-    .insert({uri_id: ids[0], graph_id: ids[1]})
-    .run(connection)
-
-    r.db('layouts')
-    .table('versionTranslation')
-    .insert({graph_id:ids[1],version_id: ids[2]})
-    .run(connection);
-
-    
-    console.log(values);    
-  });
+function insert(table, data, connection, callback){
+  return r.db(dbName).table(table).insert(data).run(connection,callback);
 }
 
-r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
-  if (err) throw err;
-  console.log('hello' + conn);
-  connection = conn;
-  createNew(connection,'test', 'blah', '0.0.0')
+// Error handling?
+// create a brand new entry for a uri
+// data is expected to be an entire cytoscape object
+function createNew(connection, uri, data, version, callback){
+ 
+  var uriProm = insert('uri',{uri:uri},connection); 
+  var graphProm = insert('graph', {graph:data}, connection);
+  var verProm = insert('version',{version:version},connection);
 
-});
+  var createPromise = Promise.all([uriProm, graphProm, verProm]).then(ids=> {
+    var uriTP = insert('uriTranslation',{uri_id:ids[0].generated_keys[0],graph_id: ids[1].generated_keys[0]}, connection);
+    var uriVP = insert('versionTranslation',{graph_id:ids[1].generated_keys[0],version_id: ids[2].generated_keys[0]}, connection);
+    return Promise.all([uriTP,uriVP]);
+  });
+
+  if(callback){
+    createPromise.then(result=>{
+      callback();
+    });
+  } else {
+    return createPromise;
+  }
+}
+
+
+// Find the graph id that matches the provided uri and version 
+function getGraphID(uri,version,connection,callback){
+  var versionMatches = r.db(dbName)
+  .table('versionTranslation')
+  .eqJoin('version_id',r.db(dbName).table('version'))
+  .zip()
+  .filter({version:version})
+  .eqJoin('graph_id',r.db(dbName).table('graph'))
+  .zip()
+  .run(connection);
+
+  var uriMatches = r.db(dbName)
+  .table('uriTranslation')
+  .eqJoin('uri_id',r.db(dbName).table('uri'))
+  .zip()
+  .filter({uri:uri})
+  .eqJoin('graph_id', r.db(dbName).table('graph'))
+  .zip()
+  .run(connection);
+
+  var graphProm = Promise.all([versionMatches,uriMatches]).then(([verCursor, uriCursor])=>{
+    return Promise.all([verCursor.toArray(),uriCursor.toArray()]);
+  }).then(([versions,uris])=>{
+    if (versions.length === 0){
+      // this shouldn't happen. Version update script should handle this connection
+      throw new Error('No graphs for this version');
+    }
+    if (uris.length === 0){
+      // this also shouldn't happen for the same reason.
+      throw new Error('No graphs associated with this uri');
+    }
+
+    for (var i=0; i<uris.length; i++){
+      for (var j =0; j < versions.length; j++){
+        if (versions[j]['graph_id'] === uris[i]['graph_id']){
+          return versions[j]['graph_id'];
+        }
+      }
+    }
+    throw new Error('No match between graphs for this set of version number and uri');
+    // If there is no match then this uri hasn't been saved in this version? Shouldn't happen
+  })
+
+  if(callback){
+    graphProm.then((result)=>{
+      callback();
+    });
+  }else{
+    return graphProm;
+  }
+}
+
+// ----------- Submit a new layout -----------------------
+
+function updateEntry(uri, layout, version, user, connection, callback){
+  var result = getGraphID(uri,version,connection)
+  .then((result)=>{
+    return insert('layout',{
+      graph_id:result, layout:layout, date_added: new Date(),
+      flagged:false, added_by: user},
+      connection);
+  })
+
+  if(callback){ 
+    result.then(callback());
+  } else {
+    return result;
+  }
+}
+
+
+// --------- Fake Heuristics ---------------
+function runFakeHeuristics(layouts,callback){
+  var layout = layouts.toArray()
+  .then((result)=>{
+    return result[0];
+  })
+
+  if(callback){
+    layout.then((result)=>{
+      callback();
+    });
+  }else{
+    return layout;
+  }
+}
+
+// Retrieve layout from the database based on a uri and a version
+
+function getLayout(uri, version,connection, callback){
+  var layout = getGraphID(uri,version,connection)
+  .then((result)=>{
+    return r.db(dbName)
+    .table('layout')
+    .filter({graph_id:result})
+    .orderBy(r.desc('date_added'))
+    .run(connection);
+  })
+  .then((result)=>{
+    return runFakeHeuristics(result);
+  })
+  
+  if(callback){
+    layout.then((result)=>{
+      callback();
+    });
+  } else {
+    return layout;
+  }
+}
+
+
+
+// ----------- TEST CODE --------------------
+var connection = null;
+
+r.connect({host:'localhost', port:28015})
+.then(function(conn){
+  connection = conn;
+  var a = createNew(conn,'test','gobbledegook','6.6.6');
+  var b =createNew(conn, 'test', 'hooplah', '1.1.1');
+  var c = createNew(conn, 'test2', 'hello', '1.1.1');
+
+  return Promise.all([a,b,c]);
+})
+.then(function(result){
+  updateEntry('test','bad-layout','1.1.1','billybob',connection)
+  .then(function(result){
+    return getLayout('test','1.1.1',connection);
+  }).then(function(result){
+    console.log(result);
+  });
+})
