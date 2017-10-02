@@ -169,25 +169,6 @@ const bindHover = (cy) => {
   });
 
 
-  //Tippy JS Events
-  //Binding actions (Try/Catch blocks re only for quick demo purposes)
-  //Bind mouse over event to tippy.show()
-  cy.on('mouseover', 'node', function (evt) {
-    try {
-      var popperElement = evt.target.scratch('tippy-popper');
-      evt.target.scratch('tippy').show(popperElement);
-    }
-    catch (e) {}
-  });
-
-  //Bind mouse out  event to tippy.hide()
-  cy.on('mouseout', 'node', function (evt) {
-    try {
-      var popperElement = evt.target.scratch('tippy-popper');
-      evt.target.scratch('tippy').hide(popperElement);
-    }
-    catch (e) {}
-  });
 
 };
 
