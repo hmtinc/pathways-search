@@ -1,11 +1,10 @@
 import React from 'react';
-import {Col, Glyphicon, Navbar, Nav, NavItem, OverlayTrigger, Popover} from 'react-bootstrap';
-import {saveAs} from 'file-saver';
-import queryString from 'query-string';
 
 import Snackbar from 'material-ui/Snackbar';
 
-import {Graph, ModalFramework} from './components/';
+import queryString from 'query-string';
+
+import {Graph, Menu} from './components/';
 
 import make_cytoscape from './cy/';
 
@@ -26,12 +25,16 @@ export class View extends React.Component {
     this.state = {
       query: query,
       cy: make_cytoscape({ headless: true }), // cytoscape mounted after Graph component has mounted
-      sbgnText: {},
+      sbgnText: {}, // outdated. graphJSON is used now. Any function using this field needs to be changed
+      graphJSON: {},
       name: '',
       datasource: '',
-      snackbarOpen: false,
-      snackbarMsg: '',
-      snackbarDur: 4000
+      snackbar: {
+        snackbarOpen: false,
+        snackbarMsg: '',
+        snackbarDur: 4000
+      },
+      active_overlay: ''
     };
 
     PathwayCommonsService.query(query.uri, 'SBGN')
@@ -62,7 +65,7 @@ export class View extends React.Component {
       label: query.uri
     });
 
-    this.handleRequestClose = this.handleRequestClose.bind(this);
+    this.handleSnackbarClose = this.handleSnackbarClose.bind(this);
   }
 
   componentWillReceiveProps( nextProps ) {
@@ -82,111 +85,61 @@ export class View extends React.Component {
       // CHECK FOR VALID EDIT KEY HERE
       if (editkey === '12345678') {
         this.setState({
-          snackbarOpen: true,
-          snackbarMsg: 'You are in edit mode. Be careful! Your changes are live.'
+          snackbar: {
+            snackbarOpen: true,
+            snackbarMsg: 'You are in edit mode. Be careful! Your changes are live.',
+            snackbarDur: this.state.snackbar.snackbarDur
+          }
         });
       } else {
         this.setState({
-          snackbarOpen: true,
-          snackbarMsg: 'Nice try, imposter.'
+          snackbar: {
+            snackbarOpen: true,
+            snackbarMsg: 'Nice try, imposter.',
+            snackbarDur: this.state.snackbar.snackbarDur
+          }
         });
       }
     }
   }
 
-  handleRequestClose() {
+  handleSnackbarClose() {
     this.setState({
-      snackbarOpen: false,
+      snackbar: {
+        snackbarOpen: false,
+        snackbarMsg: this.state.snackbar.snackbarMsg,
+        snackbarDur: this.state.snackbar.snackbarDur
+      }
+    });
+  }
+
+  handleOverlayToggle(overlay) {
+    this.setState({
+      active_overlay: overlay
     });
   }
 
   render() {
-    const tip_help = (
-      <Popover className="info-tip hidden-xs" id="popover-help" placement="bottom" title="Help">
-        A field guide to interpreting the display.
-      </Popover>
-    );
-    const tip_screenshot = (
-      <Popover className="info-tip hidden-xs" id="popover-screenshot" placement="bottom" title="Screenshot">
-        Click to download an image (png) of the current view.
-      </Popover>
-    );
-    const tip_downloads = (
-      <Popover className="info-tip hidden-xs" id="popover-downloads" placement="bottom" title="Downloads Menu">
-        View the different file formats available.
-      </Popover>
-    );
-    const tip_metadata = (
-      <Popover className="info-tip hidden-xs" id="popover-metadata" placement="bottom" title="Info">
-        Click to see information provided by the original datasource.
-      </Popover>
-    );
-
     if(this.state.sbgnText) {
       return(
         <div className="View">
           { !this.props.embed &&
-            (<Navbar collapseOnSelect>
-              <Navbar.Header>
-                <Col xsOffset={1} xs={9} smOffset={0} sm={2}>
-                  <span className="brand">View</span>
-                </Col>
-                <Navbar.Toggle />
-              </Navbar.Header>
-              <Navbar.Collapse>
-                <Nav>
-                  <NavItem eventKey={1} onClick={() => this.setState({active: "Information"})}>
-                    <OverlayTrigger delayShow={1000} placement="bottom" overlay={tip_metadata}>
-                      <div id="metadata">{this.state.name ? this.state.name : this.state.query.uri} | {this.state.datasource}</div>
-                    </OverlayTrigger>
-                  </NavItem>
-                </Nav>
-                <Nav pullRight>
-                  <NavItem eventKey={1} onClick={() => {
-                    const imgBlob = this.state.cy.png({output: 'blob', scale: 5, bg: 'white',full: true});
-                    saveAs(imgBlob, this.state.name  + '.png');}}>
-                    <Col xsHidden >
-                      <OverlayTrigger delayShow={1000} placement="bottom" overlay={tip_screenshot}>
-                        <Glyphicon className="glyph-tip" glyph="picture" />
-                      </OverlayTrigger>
-                    </Col>
-                    <Col smHidden mdHidden lgHidden>
-                      <span className="navitem-label">Screenshot</span>
-                    </Col>
-                  </NavItem>
-                  <NavItem eventKey={2} onClick={() => this.setState({active: "Downloads"})}>
-                    <Col xsHidden >
-                      <OverlayTrigger delayShow={1000} placement="bottom" overlay={tip_downloads}>
-                        <Glyphicon className="glyph-tip" glyph="download-alt" />
-                      </OverlayTrigger>
-                    </Col>
-                    <Col smHidden mdHidden lgHidden >
-                      <span className="navitem-label">Downloads</span>
-                    </Col>
-                  </NavItem>
-                  <NavItem eventKey={3} onClick={() => this.setState({active: "Help"})}>
-                    <Col xsHidden >
-                      <OverlayTrigger delayShow={1000} placement="bottom" overlay={tip_help}>
-                        <Glyphicon className="glyph-tip" glyph="question-sign" />
-                      </OverlayTrigger>
-                    </Col>
-                    <Col smHidden mdHidden lgHidden >
-                      <span className="navitem-label">Help</span>
-                    </Col>
-                  </NavItem>
-                </Nav>
-              </Navbar.Collapse>
-            </Navbar>)
+            (<Menu
+              name={this.state.name}
+              uri={this.state.query.uri}
+              datasource={this.state.datasource}
+              active_overlay={this.state.active_overlay}
+              cy={this.state.cy}
+              changeOverlay={(overlay) => this.handleOverlayToggle(overlay)}  
+            />)
           }
           <Graph cy={this.state.cy} sbgnText={this.state.sbgnText}/>
           <Snackbar
-            open={this.state.snackbarOpen}
-            message={this.state.snackbarMsg}
-            autoHideDuration={this.state.snackbarDur}
-            onRequestClose={this.handleRequestClose}
+            open={this.state.snackbar.snackbarOpen}
+            message={this.state.snackbar.snackbarMsg}
+            autoHideDuration={this.state.snackbar.snackbarDur}
+            onRequestClose={() => this.handleSnackbarClose()}
           />
-          {/* Menu Modal */}
-          <ModalFramework cy={this.state.cy} query={this.state.query} onHide={() => this.setState({active: ''})} active={this.state.active} name={this.state.name}/>
         </div>
       );
     }

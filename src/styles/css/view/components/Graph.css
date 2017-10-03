@@ -27,6 +27,15 @@
 		cursor: pointer;
 		margin-right: 1px;
 	}
+
+	& .layoutMenu {
+		width: 25%;
+		margin-left: 24px;
+		/* background-color: var(--lightGrey);
+		border-radius: 1px;
+		border: 1px solid var(--darkGrey); */
+	}
+
 	& #layout {
 		border: 0;
 	}

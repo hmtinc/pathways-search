@@ -1,0 +1,13 @@
+.menuBar {
+  & .menuInfoButton {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  & .menuIcons {
+    display: flex;
+    flex-grow: 1;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+}
