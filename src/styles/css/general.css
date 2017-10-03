@@ -52,3 +52,8 @@ a.clickable:hover {
 		font-weight: 700;
 	}
 }
+
+/* Used a lot for material UI list items */
+.flex-column {
+	flex-direction: column;
+}

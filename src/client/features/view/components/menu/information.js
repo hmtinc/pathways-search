@@ -1,5 +1,7 @@
 import React from 'react';
-import classNames from 'classnames';
+
+import {DialogContentText} from 'material-ui/Dialog';
+import Typography from 'material-ui/Typography';
 
 import {PathwayCommonsService} from '../../../../services/';
 
@@ -23,14 +25,14 @@ export class Information extends React.Component {
 
   render() {
     return(
-      <div className={classNames('Information', (this.props.hidden ? 'hidden' : ''))}>
+      <div>
         {this.state.comments.map((comment, index) => {
           return (
-            <div className="comment" key={index}>
-              {comment}
+            <Typography key={index} component='div'>
+              {comment.replace(/<p>/g, ' ')}
               <br/>
               <br/>
-            </div>
+            </Typography>
           );
         })}
       </div>

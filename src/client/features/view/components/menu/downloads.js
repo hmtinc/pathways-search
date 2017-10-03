@@ -2,6 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import {saveAs} from 'file-saver';
 
+import List from 'material-ui/List';
 import {DownloadCard} from './download-card';
 
 import {Spinner} from '../../../common-components/';
@@ -48,7 +49,7 @@ export class Downloads extends React.Component {
     return(
       <div className={classNames('Downloads', (this.props.hidden ? 'hidden' : ''))}>
         <Spinner full={true} hidden={!this.state.loading}/>
-        <div className="downloadContainer clearfix">
+        <List className="downloadContainer clearfix">
           {/* All custom download links go below */}
           <DownloadCard name="Image" format="png" onClick={() => {
             const imgBlob = this.props.cy.png({
@@ -78,9 +79,10 @@ export class Downloads extends React.Component {
                 Analysis with graph algorithms
               </li>
             </ul>
+            <br/>
             Format: <a target="_blank" href="http://wiki.cytoscape.org/Cytoscape_User_Manual/Network_Formats">SIF</a>
           </DownloadCard>
-        </div>
+        </List>
       </div>
     );
   }
