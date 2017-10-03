@@ -58,13 +58,13 @@ fs.readdir(dirs.in, function(err, files) {
     var json_data = convert(xml_data);
     json_data['uri'] = curr_uri;
 
-    var new_filepath = dirs.out+'/'+curr_uri+'.json'
+    var new_filepath = dirs.out+'/'+curr_uri+'.json';
     //console.log(new_filepath)
     fs.writeFileSync(new_filepath, JSON.stringify(json_data));
     files_created++;
   }
   console.log('Created '+files_created+' files in '+dirs.out+' from '+files.length+' files in '+dirs.in+'.');
   if (excluded_files) {console.log('Excluded files:');}
-  for (var i = 0; i < excluded_files.length; i++) {console.log(excluded_files[i])};
-})
+  for (var i = 0; i < excluded_files.length; i++) {console.log(excluded_files[i]);}
+});
 

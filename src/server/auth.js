@@ -12,7 +12,7 @@ function reservedIPComparison(givenIP) {
     ['3758096384', 402653183], /*   224.0.0.0 - 239.255.255.255 */];
 
   //Convert IPV6 local to IPV4 Local 
-  if (givenIP.charAt(0) == ':' && givenIP != "::1") {
+  if (givenIP.charAt(0) == ':' && givenIP != '::1') {
     givenIP = givenIP.slice(7);
   }
 
@@ -48,4 +48,4 @@ module.exports.checkUser = function (req, socketIO = false) {
 
   //Check if user ip is local
   return reservedIPComparison(ip);
-}
+};

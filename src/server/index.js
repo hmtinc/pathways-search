@@ -37,7 +37,7 @@ var connPromise = accessDB.connect(); // returns a promise.
 
 //Return Confirmation
 app.get('/', function (req, res) {
-  res.json("This Server Uses Socket.io!")
+  res.json('This Server Uses Socket.io!');
 });
 
 //Return if a user can edit
@@ -58,7 +58,7 @@ function getLayout(io, socket, ioPackage) {
         function (layout) {
           io.emit('LayoutPackage', layout);
         });
-    })
+    });
   }
   catch (e) {
     io.emit('error', 'error');
@@ -81,7 +81,7 @@ function submitLayout(io, socket, ioPackage) {
         io.emit('error', 'ERROR');
       }
     }).catch((e) => {
-      console.log(e);
+      throw e;
     });
   }
   catch (e) {
@@ -120,12 +120,11 @@ app.get('/GetLayout', function (req, res) {
           if (!layout) {
             res.json('Nothing to show.');
           } else {
-            console.log(layout);
             res.json(layout);
           }
         });
     }).catch((e) => {
-      console.log(e);
+      throw e;
     });
   }
   catch (e) {
@@ -152,12 +151,12 @@ app.post('/SubmitLayout', function (req, res) {
         res.json('ERROR : You Do Not Have Valid Permissions!');
       }
     }).catch((e) => {
-      console.log(e);
-    })
+      throw e;
+    });
   }
   catch (e) {
-    console.log(e);
     res.json('ERROR : Layout Update Failed!');
+    throw e;
   }
 });
 
