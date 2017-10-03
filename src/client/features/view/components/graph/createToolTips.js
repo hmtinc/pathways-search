@@ -1,3 +1,6 @@
+import OpenInNew from 'material-ui-icons/OpenInNew';
+import PictureAsPdf from 'material-ui-icons/PictureAsPdf';
+
 const React = require('react');
 const ReactDOM = require('react-dom');
 
@@ -32,8 +35,8 @@ export class ToolTip extends React.Component {
           <div className="tooltip-image">
             <img src="img/tooltip/tooltip.png" alt="" />
             <div className="tooltip-heading"> {name} </div>
-            <img className="tooltip-button-pdf" src="img/tooltip/pdf.png" alt="" />
-            <img className="tooltip-button-show" src="img/tooltip/open.png" alt="" />
+            <OpenInNew className ='tooltip-button-show'/>
+            <PictureAsPdf className='tooltip-button-pdf'/>
             <div className="tooltip-internal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sagittis, sem non pharetra dictum, eros turpis condimentum
                 sem, ut sagittis mi elit a elit. Duis dignissim, augue a hendrerit venenatis, dolor metus sagittis nisi, vitae tempus
                 lectus risus vel lacus. Proin dictum, metus in accumsan condimentum, tortor diam porta tellus, et accumsan elit ex
