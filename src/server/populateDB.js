@@ -7,10 +7,9 @@ The input folder should contain XMLs where the title of each XML is something li
 http___someinfo_someotherinfo_somemoreinfo.xml
 */
 
-const r = require('rethinkdb'); // Not yet used
 const fs = require('fs'); // node file system, to be used for importing XMLs
 const convert = require('sbgnml-to-cytoscape'); // used to convert to cy JSONs
-
+const update = require('./updateVersion');
 
 const args = process.argv;
 
@@ -20,6 +19,23 @@ const dirs = {
 dirs.out = args[3] ? args[3] : dirs.in;
 
 console.log(dirs);
+
+// Takes in a uri-to-be with and checks if it has the form
+// 'http___stuff_morestuff_otherstuff'
+function validateURI(uri) {
+  return uri.slice(-4) === '.xml' || /^http_{3}/.test(uri);
+}
+
+// Takes in a uri-to-be with the form http___stuff_morestuff_otherstuff
+// and replace all underscores with the URI characted for "/", except those
+// three underscores following http
+function URIify(str) {
+  var str_change = str.replace(/\s/g, ''); // eliminate whitespace
+  str_change = str_change.replace(/^(http)_{3}/, 'http%3A%2F%2F'); // replace http___ with uri encoded http://
+  str_change = str_change.replace(/_/g, '%2F'); // replace rest of underscores with slashes
+  str_change = str_change.slice(0,-4); // get rid of .xml extension
+  return str_change;
+}
 
 fs.readdir(dirs.in, function(err, files) {
   if (err) throw err;
@@ -53,19 +69,3 @@ fs.readdir(dirs.in, function(err, files) {
   for (var i = 0; i < excluded_files.length; i++) {console.log(excluded_files[i])};
 })
 
-// Takes in a uri-to-be with and checks if it has the form
-// 'http___stuff_morestuff_otherstuff'
-function validateURI(uri) {
-  return uri.slice(-4) === '.xml' || /^http_{3}/.test(uri);
-}
-
-// Takes in a uri-to-be with the form http___stuff_morestuff_otherstuff
-// and replace all underscores with the URI characted for "/", except those
-// three underscores following http
-function URIify(str) {
-  var str_change = str.replace(/\s/g, ''); // eliminate whitespace
-  str_change = str_change.replace(/^(http)_{3}/, 'http%3A%2F%2F'); // replace http___ with uri encoded http://
-  str_change = str_change.replace(/_/g, '%2F'); // replace rest of underscores with slashes
-  str_change = str_change.slice(0,-4); // get rid of .xml extension
-  return str_change;
-}
