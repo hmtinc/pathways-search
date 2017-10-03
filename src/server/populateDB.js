@@ -9,7 +9,6 @@ http___someinfo_someotherinfo_somemoreinfo.xml
 
 const fs = require('fs'); // node file system, to be used for importing XMLs
 const convert = require('sbgnml-to-cytoscape'); // used to convert to cy JSONs
-const update = require('./updateVersion');
 
 const args = process.argv;
 
