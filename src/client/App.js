@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import {Alert} from 'react-bootstrap';
 import ReactGA from 'react-ga';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {Theme} from './Theme.js';
 
 import {EntryPage, Search, View, Paint, Admin} from './features';
 
@@ -61,7 +62,7 @@ export class App extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider>
+      <MuiThemeProvider theme={Theme}>
         <HashRouter className='App'>
           <div className={classNames('Index', this.state.embed ? 'iframe' : '', this.props.className)}>
             <div className={this.state.embed ? '' : 'Content'}>

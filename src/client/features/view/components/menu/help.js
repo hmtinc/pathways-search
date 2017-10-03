@@ -4,7 +4,7 @@ import {Thumbnail} from 'react-bootstrap';
 
 // Interactions
 // Prop Dependencies ::
-export class Help extends React.Component {
+export class HelpMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};

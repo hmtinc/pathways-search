@@ -1,15 +1,15 @@
 import React from 'react';
-import classNames from 'classnames';
 import isEmpty from 'lodash.isempty';
 
-import { Col, Row, DropdownButton, MenuItem } from 'react-bootstrap';
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Menu, { MenuItem } from 'material-ui/Menu';
 
 import convertSbgn from 'sbgnml-to-cytoscape';
 
 import { defaultLayout, getDefaultLayout, layoutNames, layoutMap } from './layout/';
 import { Spinner, ErrorMessage } from '../../../common-components';
 
-import * as toolTipCreator from './createToolTips.js' 
+import * as toolTipCreator from './createToolTips.js' ;
 
 // Graph
 // Prop Dependencies ::
@@ -25,6 +25,8 @@ export class Graph extends React.Component {
       width: '100vw',
       height: '85vh',
       layout: defaultLayout,
+      layoutMenuOpen: false,
+      layoutMenuAnchorEl: null,
       availableLayouts: []
     };
   }
@@ -57,8 +59,8 @@ export class Graph extends React.Component {
 
 
   // Graph rendering is not tracked by React
-  renderGraph(sbgnString) {
-    const graphJSON = convertSbgn(sbgnString);
+  renderGraph(sbgnText) {
+    const graphJSON = convertSbgn(sbgnText);
     const cy = this.props.cy;
 
     cy.remove('*');
@@ -84,7 +86,7 @@ export class Graph extends React.Component {
 
   render() {
     const layoutDropdownItems = this.state.availableLayouts.map((layoutName) =>
-      <MenuItem key={layoutName} onClick={() => this.setState({ layout: layoutName })}>
+      <MenuItem key={layoutName} onClick={() => this.setState({layout: layoutName, layoutMenuOpen: false})}>
         {layoutName}
       </MenuItem>
     );
@@ -92,13 +94,26 @@ export class Graph extends React.Component {
     if (!this.state.graphEmpty) {
       return (
         <div className='Graph'>
-          <Row>
-            <Col xsOffset={1} xs={9} smOffset={2} sm={2}>
-              <DropdownButton id="layout" bsStyle="default" pullRight={true} bsSize="large" block title={`Layout | ${this.state.layout}`}>
-                {layoutDropdownItems}
-              </DropdownButton>
-            </Col>
-          </Row>
+          <List className='layoutMenu'>
+            <ListItem
+              button
+              aria-haspopup='true'
+              aria-controls='lock-menu'
+              aria-label={`Layout | ${this.state.layout}`}
+              onClick={(e) => this.setState({layoutMenuOpen: true, layoutMenuAnchorEl: e.currentTarget})}
+            >
+              <ListItemText
+                primary={`Layout | ${this.state.layout}`}
+              />
+            </ListItem>
+          </List>
+          <Menu
+            anchorEl={this.state.layoutMenuAnchorEl}
+            open={this.state.layoutMenuOpen}
+            onRequestClose={() => this.setState({layoutMenuOpen: false})}
+          >
+            {layoutDropdownItems}
+          </Menu>
           <div className="SpinnerContainer">
             <Spinner hidden={this.state.graphRendered} />
           </div>
