@@ -1,11 +1,5 @@
 
 /*
-Functions to write:
-- createNew (uri, layout)
-- getFromURI (uri [, version]) //defaults to latest version 
-- updateLayout(uri, layout [, version]) // defaults to latest version
-- latestVersion()
-- 
 - userFunctions
   - correctCredentials(username, password)
   - createUser(username, passwords, permissions) 
@@ -314,6 +308,7 @@ function connect(){
 module.exports = {
   connect: connect,
   getLayout: getLayout,
+  getGraphID: getGraphID,
   updateEntry: updateEntry,
   createNew: createNew
 };

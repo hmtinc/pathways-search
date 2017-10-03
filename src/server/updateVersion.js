@@ -1,7 +1,5 @@
 // TO DO:
-// Create more thorough error handlling.
 // Link this to populateDB.js file xml file reading 
-
 
 process.on('unhandledRejection', up => { throw up; }); // fail loudly. Enforces good promise handling
 

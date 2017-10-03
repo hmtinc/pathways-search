@@ -132,7 +132,42 @@ app.get('/GetLayout', function (req, res) {
   }
 });
 
+app.get('/GetEditKey', function(req,res){
+  
+  try{
+    connPromise.then((connection)=> {
+      if (auth.checkUser(req)){
+        accessDB.getGraphID(
+          req.query.uri,
+          req.query.version,
+          connection,
+          function(result){res.json(result);});
+      } else {
+        res.json('ERROR: Non-authenticated user');
+      }
+    })
+  }
+  catch (e) {
+    res.json('ERROR: Edit Key Request Failed');
+    throw e;
+  }
+});
 
+app.get('/CheckEditKey', function(req,res){
+  try{
+    connPromise.then((connection)=>{
+      accessDB.getGraphID(
+        req.query.uri,
+        req.query.version,
+        connection,
+        function(result){ res.json(result === req.query.key);}
+      );
+    });
+  } catch (e){
+    res.json('ERROR : Edit Priviliges Chech Failed');
+    throw e;
+  }
+});
 
 //Return if a user can edit
 app.post('/SubmitLayout', function (req, res) {
