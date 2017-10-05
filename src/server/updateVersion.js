@@ -7,8 +7,16 @@ const r = require('rethinkdb');
 
 const dbName = 'layouts'; // easily allow testing on a fake database once the system is in use
 
+function connect(){
+  return r.connect( {host: 'localhost', port: 28015});
+}
+
 function insert(table, data, connection, callback) {
   return r.db(dbName).table(table).insert(data).run(connection, callback);
+}
+
+function createVersion(version, connection,callback){
+  return insert('version',{version:version},connection,callback);
 }
 
 /* updateVersion(version,uris, data,connection,callback) creates the framework
@@ -56,12 +64,16 @@ function updateVersionEntry(uri, data, versionId, connection, callback) {
   // currently a hard check. Should consider if this is intelligent!
   var existingData = r.db(dbName)
     .table('graph')
-    .filter({ graph: data })
+    .filter(function(graph){
+      return graph === data;
+    })
     .limit(1)
     .run(connection);
 
   var update = Promise.all([existingUri, existingData])
     .then((result) => {
+      // Stuff here doesn't print
+
       Promise.all([result[0].toArray(), result[1].toArray()])
         .then(([uriList, dataList]) => {
           // Create a list of ids for existing data for this graph and this version
@@ -152,5 +164,8 @@ function updateVersionEntry(uri, data, versionId, connection, callback) {
 }
 
 module.exports = {
-  updateVersion: updateVersion
+  createVersion: createVersion,
+  updateVersion: updateVersion,
+  updateVersionEntry: updateVersionEntry,
+  connect: connect
 };

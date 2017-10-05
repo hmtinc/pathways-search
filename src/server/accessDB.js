@@ -216,7 +216,7 @@ function updateEntry(uri, layout, version, user, connection, callback){
   var result = getGraphID(uri,version,connection)
   .then((result)=>{
     return insert('layout',{
-      graph_id:result, layout:layout, date_added: new Date(),
+      graph_id:result, layout:layout, date_added: r.now(), 
       flagged:false, added_by: user},
       connection);
   }).catch(function(){

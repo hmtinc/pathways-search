@@ -9,15 +9,18 @@ http___someinfo_someotherinfo_somemoreinfo.xml
 
 const fs = require('fs'); // node file system, to be used for importing XMLs
 const convert = require('sbgnml-to-cytoscape'); // used to convert to cy JSONs
+const update = require('./updateVersion.js');
+var ProgressBar = require('progress');
 
 const args = process.argv;
 
-const dirs = {
-  in: args[2] ? args[2] : './', 
-};
-dirs.out = args[3] ? args[3] : dirs.in;
+const version = args[2];
+const dir = args[3] ? args[3] : './';
 
-console.log(dirs);
+if (!version) throw Error ('no version provided');
+
+console.log(version);
+console.log(dir);
 
 // Takes in a uri-to-be with and checks if it has the form
 // 'http___stuff_morestuff_otherstuff'
@@ -36,35 +39,76 @@ function URIify(str) {
   return str_change;
 }
 
-fs.readdir(dirs.in, function(err, files) {
-  if (err) throw err;
+var connectionPromise = update.connect();
+var conn = null;
 
-  var files_created = 0;
-  var excluded_files = [];
+connectionPromise.then((connection)=>{
+  conn = connection;  
+  return update.createVersion(version,connection);
 
-  // Create the write directory if needed.
-  if (!fs.existsSync(dirs.out)){
-    fs.mkdirSync(dirs.out);
+}).catch((e)=>{
+  throw e;
+}).then(()=>{
+  if (!conn){
+    throw Error ('No connection');
   }
 
-  for (var i = 0; i < files.length; i++) {
-    var curr_file = files[i];
-    if (!validateURI(curr_file)) {
-      excluded_files.push(curr_file);
-      continue;
-    }
-    var curr_uri = URIify(curr_file);
-    var xml_data = fs.readFileSync(dirs.in+'/'+files[i]);
-    var json_data = convert(xml_data);
-    json_data['uri'] = curr_uri;
+  
+  fs.readdir(dir, function(err, files) {
+    var bar = new ProgressBar('[:bar] :percent :eta', {
+      total: files.length,
+      width: 20,
+      stream: process.stderr
+    });
 
-    var new_filepath = dirs.out+'/'+curr_uri+'.json';
-    //console.log(new_filepath)
-    fs.writeFileSync(new_filepath, JSON.stringify(json_data));
-    files_created++;
-  }
-  console.log('Created '+files_created+' files in '+dirs.out+' from '+files.length+' files in '+dirs.in+'.');
-  if (excluded_files) {console.log('Excluded files:');}
-  for (var i = 0; i < excluded_files.length; i++) {console.log(excluded_files[i]);}
+    if (err) throw err;
+  
+    var files_created = 0;
+    var excluded_files = [];
+    
+  
+    for (var i = 0; i < files.length; i++) {
+
+      var curr_file = files[i];
+      if (!validateURI(curr_file)) {
+        excluded_files.push(curr_file);
+        bar.tick()
+        continue;
+      }
+      var curr_uri = URIify(curr_file);
+      var xml_data = fs.readFileSync(dir+'/'+files[i]);
+      var json_data = convert(xml_data);
+      bar.tick(1);
+      //console.log(bar.curr);
+      if (bar.complete){
+        console.log('\ncomplete\n');
+      }
+
+      //console.log(files_created, ' :', curr_uri);
+      if (!(i%50)){
+        console.log('Processing file: ' + i);
+      }
+
+      try {
+        update.updateVersionEntry(curr_uri,json_data,version,conn);
+      } catch (e){
+        console.log(curr_file);
+        fs.rename(dir +'/' +  curr_file, '/Users/geoffreyelder/Desktop/Broken/' + curr_file, function(err){
+          if (err){ throw err;}
+        });
+        console.log(files_created + ' : ' + curr_uri);
+      }
+
+      files_created++;
+      //json_data['uri'] = curr_uri;
+  
+      //update.updateVersionEntry(curr_uri,json_data,version,connection)
+    } 
+    console.log('Created '+files_created+' files in database from '+files.length+' files in '+dir+'.');
+    if (excluded_files) {console.log('Excluded files:');}
+
+    for (var i = 0; i < excluded_files.length; i++) {console.log(excluded_files[i]);}
+  });
 });
+
 
