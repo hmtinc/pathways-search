@@ -1,26 +1,27 @@
 import React from 'react';
-import {Col, Button} from 'react-bootstrap';
-import classNames from 'classnames';
+
+import {
+  ListItem,
+  ListItemIcon,
+} from 'material-ui/List';
+import Typography from 'material-ui/Typography';
+
+import FileDownload from 'material-ui-icons/FileDownload';
 
 export class DownloadCard extends React.Component {
   render() {
     return (
-      <Col className={classNames('DownloadCard', this.props.name)} key={this.props.name} xs={12}>
-        <div className="tile clearfix">
-          <Col xs={12}>
-            <Button className="downloadButton" onClick={this.props.onClick}>
-              <Col className="buttonName">
-                {this.props.name}
-              </Col>
-            </Button>
-          </Col>
-          <Col xs={12}>
-            <div className="descriptiveText">
-              {this.props.children}
-            </div>
-          </Col>
+      <ListItem button onClick={this.props.onClick}>
+        <ListItemIcon>
+          <FileDownload />
+        </ListItemIcon>
+        <div>
+          <Typography type='subheading' className='menuSubheading'>{this.props.name}</Typography>
+          <Typography component='div'>
+            {this.props.children}
+          </Typography>
         </div>
-      </Col>
+      </ListItem>
     );
   }
 }

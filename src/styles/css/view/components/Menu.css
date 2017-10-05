@@ -11,3 +11,9 @@
     justify-content: flex-end;
   }
 }
+
+	
+.menuSubheading {
+  align-self: left;
+  text-decoration: underline;
+}

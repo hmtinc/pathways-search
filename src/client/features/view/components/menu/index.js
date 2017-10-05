@@ -11,8 +11,6 @@ import Toolbar from 'material-ui/Toolbar';
 import Tooltip from 'material-ui/Tooltip';
 import Typography from 'material-ui/Typography';
 
-import {DialogContentText} from 'material-ui/Dialog';
-
 import FileDownload from 'material-ui-icons/FileDownload';
 import Help from 'material-ui-icons/Help';
 import Panorama from 'material-ui-icons/Panorama';
@@ -23,20 +21,6 @@ import {Downloads} from './downloads';
 import {Overlay} from './overlay.js';
 
 export class Menu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      comments: [],
-
-    };
-    PathwayCommonsService.query(this.props.uri, 'json', 'Entity/comment')
-      .then(responses => {
-        this.setState({
-          comments: responses ? responses.traverseEntry[0].value : []
-        });
-      });
-  }
-  
   render() {
     return (
       <AppBar position='static' className='menuBar'>
@@ -60,15 +44,7 @@ export class Menu extends React.Component {
             clearOverlay={() => this.props.changeOverlay('')}
             title='Pathway Information'
           >
-            {this.state.comments.map((comment, index) => {
-              return (
-                <DialogContentText key={index}>
-                  {comment.replace(/<p>/g, ' ')}
-                  <br/>
-                  <br/>
-                </DialogContentText>
-              );
-            })}
+            <Information uri={this.props.uri} />
           </Overlay>
           <div className='menuIcons'>
             <Tooltip
