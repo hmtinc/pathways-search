@@ -10,7 +10,6 @@ http___someinfo_someotherinfo_somemoreinfo.xml
 const fs = require('fs'); // node file system, to be used for importing XMLs
 const convert = require('sbgnml-to-cytoscape'); // used to convert to cy JSONs
 const update = require('./updateVersion.js');
-var ProgressBar = require('progress');
 
 const args = process.argv;
 
@@ -55,12 +54,6 @@ connectionPromise.then((connection)=>{
 
   
   fs.readdir(dir, function(err, files) {
-    var bar = new ProgressBar('[:bar] :percent :eta', {
-      total: files.length,
-      width: 20,
-      stream: process.stderr
-    });
-
     if (err) throw err;
   
     var files_created = 0;
@@ -72,17 +65,12 @@ connectionPromise.then((connection)=>{
       var curr_file = files[i];
       if (!validateURI(curr_file)) {
         excluded_files.push(curr_file);
-        bar.tick()
         continue;
       }
       var curr_uri = URIify(curr_file);
       var xml_data = fs.readFileSync(dir+'/'+files[i]);
       var json_data = convert(xml_data);
-      bar.tick(1);
-      //console.log(bar.curr);
-      if (bar.complete){
-        console.log('\ncomplete\n');
-      }
+
 
       //console.log(files_created, ' :', curr_uri);
       if (!(i%50)){
