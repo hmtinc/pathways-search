@@ -155,18 +155,38 @@ function biopax(data, cy) {
     //Temp Values
     var tempArray;
     var baseData;
+    var childData;
+    var temp = [];
 
     //Get BaseData Object 
     if (id.includes('Protein')) {
       baseData = GetElementsByAttribute('bp:Protein', 'rdf:ID', id, xmlDoc)[0];
-      console.log(baseData.childNodes);
+      childData = baseData.children;
     }
 
+    if (childData){
+      for(var j = 0; j < childData.length; j++){
+        //Get Resources
+        var resource = childData[j].getAttribute('rdf:resource');
+        var resourceName = childData[j].tagName;
 
-    //Get All Children nodes
- 
+        //Push Resources
+        if (resource){
+          temp.push([resourceName, resource]);
+        }
+        //Push Comments
+        else if(resourceName === 'bp:comment'){
+          temp.push([resourceName, childData[j].innerHTML]);
+        }
+      }
+    }
 
-
+    //Add Data to nodes
+    cy.nodes()[i].data('metadata', temp); ;
 
   }
+
+  cy.nodes().forEach(function(data){
+    console.log(data.data()); 
+  });
 }
