@@ -71,9 +71,9 @@ function submitLayout(io, socket, ioPackage) {
   try {
     connPromise.then((connection) => {
       if (auth.checkUser(socket.request.connection.remoteAddress, true)) {
-        accessDB.updateEntry(req.body.uri,
-          req.body.layout,
-          req.body.version,
+        accessDB.saveLayout(ioPackage.uri,
+          ioPackage.layout,
+          ioPackage.version,
           connection,
           function () { io.emit('Updated'); });
       }
@@ -89,9 +89,45 @@ function submitLayout(io, socket, ioPackage) {
   }
 }
 
+function getEditKey (io, socket, ioPackage){
+  try{
+    connPromise.then((connection)=> {
+      if (auth.checkUser(socket.request.connection.remoteAddress, true)){
+        accessDB.getGraphID(
+          ioPackage.uri,
+          ioPackage.version,
+          connection,
+          function(result){io.emit('EditKey', result);});
+      } else {
+        io.emit('ERROR: Non-authenticated user');
+      }
+    });
+  }
+  catch (e) {
+    io.emit('ERROR: Edit Key Request Failed');
+    throw e;
+  } 
+}
+
+function checkEditKey(io, socket, ioPackage){
+  try{
+    connPromise.then((connection)=>{
+      accessDB.getGraphID(
+        ioPackage.uri,
+        ioPackage.version,
+        connection,
+        function(result){ io.emit('EditPermissions', result === ioPackage.key);}
+      );
+    });
+  } catch (e){
+    io.emit('ERROR : Edit Priviliges Chech Failed');
+    throw e;
+  }
+}
+
 
 io.on('connection', function (socket) {
-
+  console.log('I hear voices');
   //Get Layout
   socket.on('getlayout', function (ioPackage) {
     getLayout(io, socket, ioPackage);
@@ -102,6 +138,15 @@ io.on('connection', function (socket) {
     submitLayout(io, socket, ioPackage);
   });
 
+  socket.on('getEditKey', function(ioPackage){
+    // do something
+    getEditKey(io, socket, ioPackage);
+  });
+
+  socket.on('checkEditKey', function (ioPackage) {
+    // do something else
+    checkEditKey(io,socket,ioPackage);
+  });
 
 });
 

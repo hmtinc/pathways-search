@@ -9,16 +9,12 @@ var connection = null;
 
 r.connect( {host: 'localhost', port: 28015}, function(err, conn) {
   if (err) throw err;
-  console.log('hello' + conn);
   connection = conn;
-  createTables('layouts', [
-    'uri',
-    'uriTranslation',
+  createTables('testLayouts', [
     'graph',
-    'versionTranslation',
     'version',
     'layout',
-    'user'
+    'layout_cache'
   ], true);
 })
 
